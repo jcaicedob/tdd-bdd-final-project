@@ -35,6 +35,7 @@ DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
 )
 
+logger = logging.getLogger()
 
 ######################################################################
 #  P R O D U C T   M O D E L   T E S T   C A S E S
@@ -101,6 +102,51 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(new_product.available, product.available)
         self.assertEqual(new_product.category, product.category)
 
-    #
-    # ADD YOUR TEST CASES HERE
-    #
+    def test_read_a_product(self):
+        """It should Read a product from the database"""
+        product = ProductFactory()
+        logger.info(f"Creating product {product.name}")
+        product.id = None
+        product.create()
+        self.assertIsNotNone(product.id)
+        # Fetch the product and assert properties
+        found_product = Product.find(product.id)
+        self.assertEqual(found_product.id, product.id)
+        self.assertEqual(found_product.name, product.name)
+        self.assertEqual(found_product.description, product.description)
+        self.assertEqual(found_product.price, product.price)
+
+    def test_update_a_product(self):
+        """It should Update a product from the database"""
+        product = ProductFactory()
+        logger.info(f"Creating product {product.name}")
+        product.id = None
+        product.create()
+        # Verify that the product was created
+        self.assertIsNotNone(product.id)
+        # Update the description property and assert it was updated
+        product.description = "New description"
+        orig_id = product.id
+        product.update()
+        self.assertEqual(orig_id, product.id)
+        self.assertEqual(product.description, "New description")
+        all_products = Product.all()
+        self.assertEqual
+
+    def test_delete_a_product(self):
+        """It should Delete a product from the database"""
+        product = ProductFactory()
+        product.create()
+        self.assertEqual(len(Product.all()), 1)
+        # Delete the product and assert the db is empty
+        product.delete()
+        self.assertEqual(len(Product.all()), 0)
+
+    def test_list_all_products(self):
+        """It should list all products in the database"""
+        products = Product.all()
+        self.assertEqual(len(Product.all()), 0)
+        for _ in range(5):
+            product = ProductFactory()
+            product.create()
+        self.assertEqual(len(Product.all()), 5)

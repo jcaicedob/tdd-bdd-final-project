@@ -24,21 +24,6 @@ from service.models import Product, Category
 
 class ProductFactory(factory.Factory):
     """Creates fake products for testing"""
-    class Meta:
-        model = Product
-
-    # Add attributes here...
-    id = factory.sequence(lambda n: n)
-    name = FuzzyChoice(choices=[])
-    description = ''
-    price = ''
-    available = FuzzyChoice(choices=[True, False])
-    category = 
-    
-    email = factory.Faker('email')
-    phone_number = factory.Faker('phone_number')
-    disabled = FuzzyChoice(choices=[True, False])
-    date_joined = FuzzyDate(date(2008,1,1))
 
     class Meta:
         """Maps factory to data model"""
@@ -62,7 +47,7 @@ class ProductFactory(factory.Factory):
         ]
     )
     description = factory.Faker('text')
-    price = FuzzyDecimal(0.5,1000.0,2)
+    price = FuzzyDecimal(0.5, 2000.0, 2)
     available = FuzzyChoice(choices=[True,False])
     category = FuzzyChoice(choices=[
         Category.UNKNOWN,
