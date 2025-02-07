@@ -163,9 +163,51 @@ class TestProductRoutes(TestCase):
         response = self.client.post(BASE_URL, data={}, content_type="plain/text")
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
-    #
-    # ADD YOUR TEST CASES HERE
-    #
+    # ADDED LAB TEST CASES
+
+    def test_get_product(self):
+        """It should Read a product"""
+        test_product = self._create_products()[0]
+        response = self.client.get(f"{BASE_URL}/{test_product.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(test_product.name, data["name"])    
+  
+    def test_get_product_not_found(self):
+        """Tries to Read a product that does not exist"""
+        response = self.client.get(f"{BASE_URL}/99")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+  
+    def test_update_product(self):
+        """It should Update a given product"""
+        # Creates a product through endpoint
+        test_product = ProductFactory()
+        response = self.client.post(BASE_URL, json=test_product.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Set the field to modify / update
+        product = response.get_json()
+        product['description'] = "testing"
+
+        # Perform the update and verify
+        response = self.client.put(f"{BASE_URL}/{product['id']}", json=product)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        updated = response.get_json()
+        self.assertEqual(updated['description'], 'testing')
+  
+    def test_delete_product(self):
+        """It should Delete a given product"""
+        # Creates a product through endpoint
+        test_product = ProductFactory()
+        response = self.client.post(BASE_URL, json=test_product.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Delete the product
+        product = response.get_json()
+        response = self.client.delete(f"{BASE_URL}/{product['id']}", json=product)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        # Response should be empty
+        self.assertEqual(len(response.data), 0)
 
     ######################################################################
     # Utility functions

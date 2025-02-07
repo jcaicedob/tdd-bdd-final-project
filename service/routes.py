@@ -105,18 +105,45 @@ def create_products():
 ######################################################################
 # R E A D   A   P R O D U C T
 ######################################################################
+@app.route("/products/<product_id>", methods=["GET"])
+def get_products(product_id):
+    """
+    Reads a product
+    This endpoint will read a Product given its ID
+    """
+    app.logger.info(f"Request to retrieve product with ID {product_id}")
+    product = Product.find(product_id)
+    if not product:
+        abort(status.HTTP_404_NOT_FOUND, f"Product with ID {product_id} not found")
 
-#
-# PLACE YOUR CODE HERE TO READ A PRODUCT
-#
+    app.logger.info(f"Returning product with ID {product_id}")
+    return product.serialize(), status.HTTP_200_OK
 
 ######################################################################
 # U P D A T E   A   P R O D U C T
 ######################################################################
+@app.route("/products/<product_id>", methods=["PUT"])
+def update_product(product_id):
+    """
+    Updates a product
+    This endpoint will update a Product given its ID
+    """
+    app.logger.info(f"Request to update product with ID {product_id}")
+    # Retrive the product
+    product = Product.find(product_id)
+    if not product:
+        abort(status.HTTP_404_NOT_FOUND, f"Product with ID {product_id} not found")
+    
+    # Create a Product object using sent data
+    product.deserialize(request.get_json())
+    product.update()
+    return product.serialize(), status.HTTP_200_OK
 
-#
-# PLACE YOUR CODE TO UPDATE A PRODUCT HERE
-#
+    new_data = request.get_json()
+
+
+    app.logger.info(f"Returning product with ID {product_id}")
+    return product.serialize(), status.HTTP_200_OK
 
 ######################################################################
 # D E L E T E   A   P R O D U C T
