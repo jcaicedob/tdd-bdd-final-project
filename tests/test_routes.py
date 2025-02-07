@@ -28,9 +28,10 @@ import os
 import logging
 from decimal import Decimal
 from unittest import TestCase
+from urllib.parse import quote_plus
 from service import app
 from service.common import status
-from service.models import db, init_db, Product
+from service.models import db, init_db, Product, Category
 from tests.factories import ProductFactory
 
 # Disable all but critical errors during normal test run
@@ -209,6 +210,59 @@ class TestProductRoutes(TestCase):
         # Response should be empty
         self.assertEqual(len(response.data), 0)
 
+    def test_list_all_products(self):
+        """It should List all products"""
+        # Creates a batch of products
+        self._create_products(5)
+        # Retrieve all products
+        response = self.client.get(BASE_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        products = response.get_json()
+        self.assertEqual(len(products), 5)
+
+    def test_list_by_name(self):
+        """It should List products with a specific name"""
+        # Creates a batch of products
+        products = self._create_products(5)
+
+        # Retrieve product from DB
+        test_name = products[0].name
+        match_products = [product for product in products if product.name == test_name]
+        match_count = len(match_products)
+        response = self.client.get(BASE_URL, query_string=f"name={quote_plus(test_name)}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), match_count)
+
+    def test_list_by_category(self):
+        """It should List Products by category"""
+        products = self._create_products(5)
+        category = products[0].category
+        match_products = [product for product in products if product.category == category]
+        match_count = len(match_products)
+        logging.debug("Found Products [%d] %s", match_count, match_products)
+
+        # test for available
+        response = self.client.get(BASE_URL, query_string=f"category={category.name}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), match_count)
+        # check the data just to be sure
+        for product in data:
+            self.assertEqual(product["category"], category.name)
+            
+    def test_list_by_availability(self):
+        """It should List Products by availabilty"""
+        products = self._create_products(5)
+        match_products = [product for product in products if product.available == True]
+        match_count = len(match_products)
+
+        # Perform test
+        response = self.client.get(BASE_URL, query_string="available=true")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), match_count)
+            
     ######################################################################
     # Utility functions
     ######################################################################

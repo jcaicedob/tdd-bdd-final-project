@@ -20,7 +20,7 @@ Product Store Service with UI
 """
 from flask import jsonify, request, abort
 from flask import url_for  # noqa: F401 pylint: disable=unused-import
-from service.models import Product
+from service.models import Product, Category
 from service.common import status  # HTTP Status Codes
 from . import app
 
@@ -95,12 +95,39 @@ def create_products():
 
 
 ######################################################################
-# L I S T   A L L   P R O D U C T S
+# L I S T   P R O D U C T S
 ######################################################################
+@app.route("/products", methods=["GET"])
+def list_products():
+    """
+    Reads a list of products
+    This endpoint will read all matching products in DB
+    """
+    app.logger.info(f"Request to list products...")
 
-#
-# PLACE YOUR CODE TO LIST ALL PRODUCTS HERE
-#
+    # Check if name was given
+    name = request.args.get("name")
+    category = request.args.get("category")
+    available = request.args.get("available")
+
+    if name:
+        app.logger.info(f"Find by name: {name}")
+        products = Product.find_by_name(name)
+    elif category:
+        app.logger.info(f"Find by category: {category}")
+        # Category is an Enum object
+        category_val = getattr(Category, category.upper())
+        products = Product.find_by_category(category_val)
+    elif available:
+        app.logger.info(f"Find by availability: {available}")
+        products = Product.find_by_availability(True)
+    else:
+        app.logger.info("Find all")
+        products = Product.all()    
+
+    products_lst = [product.serialize() for product in products]
+    app.logger.info(f"Returning {len(products_lst)}")
+    return products_lst, status.HTTP_200_OK
 
 ######################################################################
 # R E A D   A   P R O D U C T
@@ -139,17 +166,19 @@ def update_product(product_id):
     product.update()
     return product.serialize(), status.HTTP_200_OK
 
-    new_data = request.get_json()
-
-
-    app.logger.info(f"Returning product with ID {product_id}")
-    return product.serialize(), status.HTTP_200_OK
-
 ######################################################################
 # D E L E T E   A   P R O D U C T
 ######################################################################
+@app.route("/products/<int:product_id>", methods=["DELETE"])
+def delete_product(product_id):
+    """
+    Deletes a product
+    This endpoint will update a Product given its ID
+    """
+    app.logger.info(f"Request to delete product with ID {product_id}")
+    # Retrieve the product
+    product = Product.find(product_id)
+    if product:
+        product.delete()
 
-
-#
-# PLACE YOUR CODE TO DELETE A PRODUCT HERE
-#
+    return "", status.HTTP_204_NO_CONTENT
