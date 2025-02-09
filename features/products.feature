@@ -61,7 +61,7 @@ Scenario: Update a Product
     And I press the "Search" button
     Then I should see the message "Success"
     And I should see "A red fedora" in the "Description" field
-    When I change the "Description" to "Test description"
+    When I change "Name" to "Fedora"
     And I press the "Update" button
     Then I should see the message "Success"
     When I copy the "Id" field
@@ -69,19 +69,16 @@ Scenario: Update a Product
     And I paste the "Id" field
     And I press the "Retrieve" button
     Then I should see the message "Success"
-    And I should see "Hat" in the "Name" field
-    And I should see "New description" in the "Description" field
+    And I should see "Fedora" in the "Name" field
     When I press the "Clear" button
     And I press the "Search" button
     Then I should see the message "Success"
-    And I should see "Hat" in the results
+    And I should see "Fedora" in the results
     And I should not see "Hat" in the results
-    And I should see "New description" in the "Description" field
-    And I should not see "A red fedora" in the "Description" field
 
 Scenario: Delete a Product
     When I visit the "Home Page"
-    And I set the "Name" to "Shows"
+    And I set the "Name" to "Shoes"
     And I press the "Search" button
     Then I should see the message "Success"
     And I should see "Blue shoes" in the "Description" field
@@ -108,7 +105,7 @@ Scenario: List all products
 Scenario: Search by category
     When I visit the "Home Page"
     And I press the "Clear" button
-    And I select "Cloths" in the "Category" dropdown list
+    And I select "Cloths" in the "Category" dropdown
     And I press the "Search" button
     Then I should see the message "Success"
     And I should see "Hat" in the results
@@ -116,17 +113,17 @@ Scenario: Search by category
     And I should not see "Big Mac" in the results
     And I should not see "Sheets" in the results
 
-Scenario: Search by availability
+Scenario: Search by available
     When I visit the "Home Page"
     And I press the "Clear" button
-    And I select "False" in the "Available" dropdown list
+    And I select "True" in the "Available" dropdown
     And I press the "Search" button
     Then I should see the message "Success"
-    And I should see "Shoes" in the results
-    And I should not see "Hat" in the results
-    And I should not see "Big Mac" in the results
-    And I should not see "Sheets" in the results
-
+    And I should see "Hat" in the results
+    And I should see "Big Mac" in the results
+    And I should see "Sheets" in the results
+    And I should not see "Shoes" in the results
+    
 Scenario: Search by name
     When I visit the "Home Page"
     And I set the "Name" to "Hat"
